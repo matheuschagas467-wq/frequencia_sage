@@ -653,11 +653,45 @@ body {
     background: rgba(0, 0, 0, 0.8);
     color: white;
     text-align: center;
-    padding: 20px;
+    padding: 16px 12px;
     border-radius: 8px;
     margin-bottom: 20px;
     font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
+
+.footer .copyright {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.footer .developer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.footer .developer img {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.footer .developer a {
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.footer .developer a:hover {
+    text-decoration: underline;
+}
+
 
 /* ==================== Responsive ==================== */
 @media (max-width: 768px) {
