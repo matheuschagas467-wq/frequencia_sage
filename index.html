@@ -1,56 +1,70 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sistema de Cálculo de Frequência Escolar</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 
-  <!-- jsPDF para exportação em PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="app-bg"></div>
+  <div class="school-bg"></div>
 
   <div class="container">
     <header class="header">
       <div class="header-content">
-        <div class="logo-section">
-          <div class="logo">📊</div>
+        <div class="brand">
+          <div class="brand-icon">🎓</div>
           <div>
             <h1>Frequência Escolar</h1>
-            <p class="subtitle">Sistema de Cálculo e Gerenciamento de Frequência</p>
+            <p class="subtitle">Sistema educacional de controle, análise e relatórios</p>
           </div>
         </div>
+
+        <button id="themeToggleBtn" class="theme-toggle-btn" type="button">
+          <span id="themeIcon">🌙</span>
+          <span id="themeText">Tema escuro</span>
+        </button>
       </div>
     </header>
 
     <nav class="tabs">
-      <button class="tab-btn active" data-tab="calculator">Calcular Frequência</button>
+      <button class="tab-btn active" data-tab="calculator">Cadastro</button>
       <button class="tab-btn" data-tab="history">Histórico</button>
-      <button class="tab-btn" data-tab="import">Importar Dados</button>
+      <button class="tab-btn" data-tab="dashboard">Dashboard</button>
+      <button class="tab-btn" data-tab="import">Importar</button>
     </nav>
 
     <main class="main-content">
       <section id="calculator" class="tab-content active">
-        <div class="content-wrapper two-columns">
-          <div class="form-section glass-card">
-            <h2>Calcular Frequência</h2>
+        <div class="content-grid">
+          <div class="card">
+            <div class="section-title">
+              <h2 id="formTitle">Cadastrar Frequência</h2>
+              <p>Preencha os dados do aluno e calcule a frequência mensal.</p>
+            </div>
 
             <form id="frequencyForm" class="form">
-              <div class="form-group">
-                <label for="studentName">Nome do Aluno <span class="optional">(opcional)</span></label>
-                <input type="text" id="studentName" placeholder="Ex: João Silva" class="form-input">
-              </div>
+              <input type="hidden" id="editingId" />
 
               <div class="form-group">
-                <label for="inepCode">Código INEP <span class="optional">(opcional)</span></label>
-                <input type="text" id="inepCode" placeholder="Ex: 12345678" class="form-input">
+                <label for="studentName">Nome do Aluno</label>
+                <input type="text" id="studentName" class="form-input" placeholder="Ex: João Silva" />
               </div>
 
-              <div class="form-group">
-                <label for="className">Turma <span class="optional">(opcional)</span></label>
-                <input type="text" id="className" placeholder="Ex: 6º Ano A" class="form-input">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="inepCode">Código INEP</label>
+                  <input type="text" id="inepCode" class="form-input" placeholder="Ex: 12345678" />
+                </div>
+
+                <div class="form-group">
+                  <label for="className">Turma</label>
+                  <input type="text" id="className" class="form-input" placeholder="Ex: 6º Ano A" />
+                </div>
               </div>
 
               <div class="form-row">
@@ -75,166 +89,226 @@
 
                 <div class="form-group">
                   <label for="year">Ano <span class="required">*</span></label>
-                  <input type="number" id="year" placeholder="Ex: 2025" class="form-input" min="2000" max="2100" required>
+                  <input type="number" id="year" class="form-input" min="2000" max="2100" required />
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label for="daysAttended">Dias Frequentados <span class="required">*</span></label>
-                  <input type="number" id="daysAttended" placeholder="Ex: 18" class="form-input" min="0" required>
+                  <input type="number" id="daysAttended" class="form-input" min="0" placeholder="Ex: 18" required />
                 </div>
 
                 <div class="form-group">
                   <label for="totalDays">Total de Dias Letivos <span class="required">*</span></label>
-                  <input type="number" id="totalDays" placeholder="Ex: 20" class="form-input" min="1" required>
+                  <input type="number" id="totalDays" class="form-input" min="1" placeholder="Ex: 20" required />
                 </div>
               </div>
 
               <div class="form-group">
-                <label for="reason">Motivo <span class="optional">(opcional)</span></label>
-                <input type="text" id="reason" placeholder="Ex: Doença, Viagem, etc." class="form-input">
+                <label for="reason">Motivo</label>
+                <input type="text" id="reason" class="form-input" placeholder="Ex: Doença, viagem, justificativa..." />
               </div>
 
               <div id="errorMessage" class="error-message" style="display:none;"></div>
 
               <div class="button-row">
-                <button type="submit" class="btn btn-primary">Calcular Frequência</button>
-                <button type="button" id="resetFormBtn" class="btn btn-secondary">Limpar Formulário</button>
+                <button type="submit" class="btn btn-primary" id="submitBtn">Salvar Frequência</button>
+                <button type="button" class="btn btn-secondary" id="resetFormBtn">Limpar</button>
+                <button type="button" class="btn btn-warning" id="cancelEditBtn" style="display:none;">Cancelar edição</button>
               </div>
             </form>
           </div>
 
-          <div id="resultCard" class="result-card glass-card" style="display:none;">
-            <div class="result-header">
-              <h3>Resultado</h3>
-              <span class="close-result" onclick="document.getElementById('resultCard').style.display='none';">&times;</span>
+          <div id="resultCard" class="card result-card" style="display:none;">
+            <div class="section-title">
+              <h2>Resultado</h2>
+              <p>Resumo do cálculo atual</p>
             </div>
 
-            <div class="result-content">
+            <div class="result-panel">
               <div class="frequency-circle">
-                <div class="frequency-value" id="frequencyValue">0</div>
+                <div id="frequencyValue" class="frequency-value">0</div>
                 <div class="frequency-unit">%</div>
               </div>
 
               <div class="result-details">
-                <div class="detail-item">
-                  <span class="detail-label">Mês/Ano</span>
-                  <span class="detail-value" id="resultMonth">-</span>
-                </div>
-
-                <div class="detail-item">
-                  <span class="detail-label">Dias Frequentados</span>
-                  <span class="detail-value" id="resultDaysAttended">-</span>
-                </div>
-
-                <div class="detail-item">
-                  <span class="detail-label">Total de Dias Letivos</span>
-                  <span class="detail-value" id="resultTotalDays">-</span>
-                </div>
-
-                <div class="detail-item" id="resultNameDiv" style="display:none;">
-                  <span class="detail-label">Nome do Aluno</span>
-                  <span class="detail-value" id="resultName">-</span>
-                </div>
-
-                <div class="detail-item" id="resultInepDiv" style="display:none;">
-                  <span class="detail-label">Código INEP</span>
-                  <span class="detail-value" id="resultInep">-</span>
-                </div>
-
-                <div class="detail-item" id="resultClassDiv" style="display:none;">
-                  <span class="detail-label">Turma</span>
-                  <span class="detail-value" id="resultClass">-</span>
-                </div>
-
-                <div class="detail-item" id="resultReasonDiv" style="display:none;">
-                  <span class="detail-label">Motivo</span>
-                  <span class="detail-value" id="resultReason">-</span>
-                </div>
+                <div class="detail-item"><span>Mês/Ano</span><strong id="resultMonth">-</strong></div>
+                <div class="detail-item"><span>Dias Frequentados</span><strong id="resultDaysAttended">-</strong></div>
+                <div class="detail-item"><span>Total de Dias</span><strong id="resultTotalDays">-</strong></div>
+                <div class="detail-item" id="resultNameDiv" style="display:none;"><span>Aluno</span><strong id="resultName">-</strong></div>
+                <div class="detail-item" id="resultInepDiv" style="display:none;"><span>INEP</span><strong id="resultInep">-</strong></div>
+                <div class="detail-item" id="resultClassDiv" style="display:none;"><span>Turma</span><strong id="resultClass">-</strong></div>
+                <div class="detail-item" id="resultReasonDiv" style="display:none;"><span>Motivo</span><strong id="resultReason">-</strong></div>
               </div>
 
-              <div class="result-status" id="resultStatus"></div>
+              <div id="resultStatus" class="result-status"></div>
             </div>
           </div>
         </div>
       </section>
 
       <section id="history" class="tab-content">
-        <div class="history-header">
-          <div>
-            <h2>Histórico de Frequência</h2>
-            <p class="section-subtitle">Gerencie, exporte e acompanhe os registros salvos.</p>
+        <div class="card">
+          <div class="history-topbar">
+            <div>
+              <h2>Histórico de Frequência</h2>
+              <p class="muted">Pesquise, filtre, edite e exporte os registros salvos.</p>
+            </div>
+
+            <div class="history-actions">
+              <button id="exportPdfBtn" class="btn btn-success">Exportar PDF</button>
+              <button id="exportCsvBtn" class="btn btn-info">Exportar CSV</button>
+              <button id="clearHistoryBtn" class="btn btn-danger">Limpar Histórico</button>
+            </div>
           </div>
 
-          <div class="history-actions">
-            <button id="exportPdfBtn" class="btn btn-success">📄 Exportar PDF</button>
-            <button id="exportCsvBtn" class="btn btn-info">📊 Exportar CSV</button>
-            <button id="clearHistoryBtn" class="btn btn-danger">🗑️ Limpar Histórico</button>
+          <div class="filters-grid">
+            <div class="form-group">
+              <label for="searchStudent">Pesquisar por aluno</label>
+              <input type="text" id="searchStudent" class="form-input" placeholder="Digite o nome do aluno" />
+            </div>
+
+            <div class="form-group">
+              <label for="filterMonth">Filtrar por mês</label>
+              <select id="filterMonth" class="form-input">
+                <option value="">Todos</option>
+                <option value="1">Janeiro</option>
+                <option value="2">Fevereiro</option>
+                <option value="3">Março</option>
+                <option value="4">Abril</option>
+                <option value="5">Maio</option>
+                <option value="6">Junho</option>
+                <option value="7">Julho</option>
+                <option value="8">Agosto</option>
+                <option value="9">Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="filterYear">Filtrar por ano</label>
+              <input type="number" id="filterYear" class="form-input" placeholder="Ex: 2026" min="2000" max="2100" />
+            </div>
+
+            <div class="form-group">
+              <label for="filterClass">Filtrar por turma</label>
+              <input type="text" id="filterClass" class="form-input" placeholder="Ex: 7º Ano B" />
+            </div>
+          </div>
+
+          <div id="historyContainer" class="history-container">
+            <p class="empty-message">Nenhum registro no histórico.</p>
           </div>
         </div>
+      </section>
 
-        <div id="historyContainer" class="history-container">
-          <p class="empty-message">Nenhum registro no histórico. Comece calculando a frequência de um aluno.</p>
+      <section id="dashboard" class="tab-content">
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="section-title">
+              <h2>Dashboard</h2>
+              <p>Visualize os índices de frequência por aluno.</p>
+            </div>
+
+            <div class="filters-grid">
+              <div class="form-group">
+                <label for="dashboardGroupBy">Exibir gráfico por</label>
+                <select id="dashboardGroupBy" class="form-input">
+                  <option value="student">Aluno</option>
+                  <option value="year">Ano</option>
+                  <option value="month">Mês</option>
+                  <option value="class">Turma</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="dashboardYear">Filtrar ano</label>
+                <input type="number" id="dashboardYear" class="form-input" placeholder="Todos" />
+              </div>
+
+              <div class="form-group">
+                <label for="dashboardMonth">Filtrar mês</label>
+                <select id="dashboardMonth" class="form-input">
+                  <option value="">Todos</option>
+                  <option value="1">Janeiro</option>
+                  <option value="2">Fevereiro</option>
+                  <option value="3">Março</option>
+                  <option value="4">Abril</option>
+                  <option value="5">Maio</option>
+                  <option value="6">Junho</option>
+                  <option value="7">Julho</option>
+                  <option value="8">Agosto</option>
+                  <option value="9">Setembro</option>
+                  <option value="10">Outubro</option>
+                  <option value="11">Novembro</option>
+                  <option value="12">Dezembro</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="dashboardClass">Filtrar turma</label>
+                <input type="text" id="dashboardClass" class="form-input" placeholder="Todas" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card chart-card">
+            <h3>Média de Frequência</h3>
+            <canvas id="frequencyChart"></canvas>
+          </div>
+
+          <div class="card stats-card">
+            <div class="stat-box">
+              <span>Total de Registros</span>
+              <strong id="statTotalRecords">0</strong>
+            </div>
+            <div class="stat-box">
+              <span>Média Geral</span>
+              <strong id="statAverage">0%</strong>
+            </div>
+            <div class="stat-box">
+              <span>Alunos abaixo de 75%</span>
+              <strong id="statBelow75">0</strong>
+            </div>
+            <div class="stat-box">
+              <span>Turmas cadastradas</span>
+              <strong id="statClasses">0</strong>
+            </div>
+          </div>
         </div>
       </section>
 
       <section id="import" class="tab-content">
-        <div class="import-section">
-          <h2>Importar Dados</h2>
-          <p class="section-subtitle">Importe registros em lote usando um arquivo CSV.</p>
+        <div class="content-grid single-col">
+          <div class="card">
+            <div class="section-title">
+              <h2>Importar Dados</h2>
+              <p>Importe registros em lote via CSV.</p>
+            </div>
 
-          <div class="import-options">
-            <div class="import-card glass-card">
-              <h3>📤 Importar CSV</h3>
-              <p>Faça upload de um arquivo CSV com os dados de frequência.</p>
-              <input type="file" id="csvFile" accept=".csv" class="file-input">
+            <div class="import-box">
+              <input type="file" id="csvFile" accept=".csv" class="form-input" />
               <button id="importCsvBtn" class="btn btn-primary">Importar CSV</button>
               <div id="importResult" class="import-result"></div>
             </div>
-
-            <div class="import-card glass-card">
-              <h3>📋 Formato do CSV</h3>
-              <p>O arquivo deve conter estas colunas:</p>
-              <code class="csv-format">
-Nome,INEP,Turma,Mês,Ano,Dias Frequentados,Total de Dias,Motivo
-João Silva,12345678,6º Ano A,10,2024,18,20,Doença
-Maria Santos,87654321,6º Ano B,10,2024,19,20,-
-              </code>
-            </div>
           </div>
 
-          <div class="import-info glass-card">
-            <h3>ℹ️ Informações Importantes</h3>
-            <ul>
-              <li><strong>Nome:</strong> Nome do aluno</li>
-              <li><strong>INEP:</strong> Código INEP (opcional)</li>
-              <li><strong>Turma:</strong> Turma do aluno (opcional)</li>
-              <li><strong>Mês:</strong> Número do mês entre 1 e 12</li>
-              <li><strong>Ano:</strong> Ano do registro</li>
-              <li><strong>Dias Frequentados:</strong> Número de presenças</li>
-              <li><strong>Total de Dias:</strong> Total de dias letivos</li>
-              <li><strong>Motivo:</strong> Campo opcional. Use <strong>-</strong> para vazio</li>
-            </ul>
+          <div class="card">
+            <h3>Formato esperado do CSV</h3>
+            <pre class="csv-format">Nome,INEP,Turma,Mês,Ano,Dias Frequentados,Total de Dias,Motivo
+João Silva,12345678,6º Ano A,10,2026,18,20,Doença
+Maria Santos,87654321,6º Ano B,10,2026,19,20,-</pre>
           </div>
         </div>
       </section>
     </main>
 
     <footer class="footer">
-      <p class="copyright">
-        &copy; <span id="ano"></span> Sistema de Cálculo de Frequência Escolar. Todos os direitos reservados.
-      </p>
-
-      <div class="developer">
-        <img src="./fghfdhfd-1.png" alt="Matheus Chagas">
-        <span>
-          Desenvolvido por
-          <a href="https://github.com/matheuschagas467-wq" target="_blank">
-            MatheusChagas.dev
-          </a>
-        </span>
-      </div>
+      <p>&copy; <span id="ano"></span> Sistema de Cálculo de Frequência Escolar</p>
+      <p>Desenvolvido por <strong>MatheusChagas.dev</strong></p>
     </footer>
   </div>
 
